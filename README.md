@@ -36,4 +36,7 @@ Videre Financiers required an AI-driven solution to answer client financial inqu
 ### 🔹 Clone the Repository
 ```bash
 git clone https://github.com/jasr1/rag-financial-chatbot.git
+```
+```
 cd ai-financial-advisor-rag-model
+```

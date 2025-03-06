@@ -53,9 +53,9 @@ def update_vector_store(pdf_dir, vector_store_dir):
 
     except Exception as e:
         print(f"An error occurred: {e}")
-# Made a change to the code below to make the path relative
+
 if __name__ == "__main__":
-    pdf_dir = "src/app/model/books/"
-    vector_store_dir = "src/app/model/vector_store/"
+    pdf_dir = "documents/"
+    vector_store_dir = "vector_store/"
 
     update_vector_store(pdf_dir, vector_store_dir)
