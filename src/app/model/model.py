@@ -1,91 +1,129 @@
-
 import os
-import json
 from dotenv import load_dotenv
+import faiss
+import numpy as np
+from google import genai
+from google.genai import types
 from pathlib import Path
-from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain.memory import ConversationBufferMemory
+import pymupdf4llm
+from langchain.text_splitter import MarkdownTextSplitter, MarkdownHeaderTextSplitter
 
-# Load environment variables from .env.local
 env_path = Path(__file__).resolve().parents[3] / '.env.local'
-load_dotenv(env_path)
+load_dotenv(dotenv_path=env_path)
 
-# Get the API key from the environment
-api_key = os.getenv("OPENAI_API_KEY")
+api_key = os.getenv("GOOGLE_API_KEY")
 if api_key is None:
-    raise ValueError("OPENAI_API_KEY not found in environment variables")
-os.environ["OPENAI_API_KEY"] = api_key
+    raise ValueError("GOOGLE_API_KEY not found in environment variables")
+os.environ["GOOGLE_API_KEY"] = api_key
 
-# Initialize components
+pdf_dir = "documents/"
+
+def combine_documents_to_markdown(pdf_dir):
+    pdf_paths = [os.path.join(pdf_dir, file) for file in os.listdir(pdf_dir) if file.endswith('.pdf')]
+    if not pdf_paths:
+        return []
+
+    documents = [pymupdf4llm.to_markdown(pdf) for pdf in pdf_paths]
+    return "\n\n".join(documents)
+
+def split_markdown(markdown):
+    header_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=[
+        ("#", "H1"),  
+        ("##", "H2"),  
+        ("###", "H3"),  
+        ("####", "H4"),  
+        ("#####", "H5"),  
+        ("######", "H6")
+    ])
+    sections = header_splitter.split_text(markdown)
+    sections_text = [doc.page_content for doc in sections]
+
+    text_splitter = MarkdownTextSplitter(chunk_size=1000, chunk_overlap=200)
+    return [chunk for section in sections_text for chunk in text_splitter.split_text(section)]
+
+markdown_text = combine_documents_to_markdown(pdf_dir)
+markdown_chunks = split_markdown(markdown_text)
+
 try:
-    faiss_index = Path(__file__).resolve().parent / "vector_store/index.faiss"
-    if faiss_index.is_file():
-        embeddings = OpenAIEmbeddings()
-        vector_store = FAISS.load_local(str(faiss_index.parent), embeddings=embeddings, allow_dangerous_deserialization=True)
+    vector_store_dir = Path(__file__).resolve().parent / "vector_store"
+    faiss_index_file = vector_store_dir / "faiss_index.bin"
+
+    if faiss_index_file.is_file():
+        index = faiss.read_index(str(faiss_index_file))
     else:
-        print("Vector store not found. Please run 'update_vector_store.py' to create the vector store.")
+        print("Vector store not found. Please run 'update_vector_store.py' to create it.")
         exit(1)
-
-    # Initializing the conversation chain with GPT-4, the vector store, and memory.
-    llm = ChatOpenAI(temperature=0.7, model_name="gpt-4")
-    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
-
-    # Creating the conversational retrieval chain
-    conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        chain_type="stuff",
-        retriever=vector_store.as_retriever(),
-        memory=memory
-    )
-
-    # questions = [
-    #     "Enter up to three questions that guide your family’s decision making.",
-    #     "What are your family values?",
-    #     "What is a statement or commitment that your family lives by?",
-    #     "What statement defines your family's vision?",
-    #     "What is your family's impact statement?"
-    # ]
-
-    # # Function to ask questions and record responses
-    # def ask_questions(questions):
-    #     responses = {}
-    #     for question in questions:
-    #         print(f"Videre AI: {question}")
-    #         response = input("You: ")
-    #         responses[question] = response
-    #         result = conversation_chain.invoke({"question": 
-    #                                             "Here is the response that the user provided: \n" + response + " \nIn your response back, I would like you to acknowledge the user's response in a friendly manner and then rephrase it back so that the user knows you understand their response. Please be sure to not ask a question back to the user, just rephrase their response back to them in a friendly manner. This is very crucial: If the response is very short (one or two words), makes no grammatical sense, and/or is blank/empty, then make sure you don't say anything."})
-    #         answer = result["answer"]
-    #         print(f"Videre AI: {answer}")
-    #     with open('family_charter_responses.json', 'w') as file:
-    #         json.dump(responses, file)
-    #     return responses
-
-    # # The loop to interact with the user
-    # print("Welcome to VidereAI. Type 'exit' to end the conversation or 'start' to begin the family charter process.")
-    # while True:
-    #     query = input("You: ")
-    #     if query.lower() == 'exit':
-    #         print("Goodbye!")
-    #         break
-    #     elif query.lower() == 'start':
-    #         user_responses = ask_questions(questions)
-    #         print("Videre AI: I have recorded all of your responses. Thank you for providing the information. If you would like to update your responses, please type 'start' again.")
-    #     else:
-    #         result = conversation_chain.invoke({"question": query})
-    #         answer = result["answer"]
-    #         print(f"Videre AI: {answer}")
-
 except Exception as e:
-    print(f"An error occurred: {e}")
+    print(f"An error occurred while loading FAISS: {e}")
+    exit(1)
 
-# Function to process chat messages
-def process_message(user_message):
+def generate_query_embedding(query):
     try:
-        result = conversation_chain.invoke({"question": user_message})
-        answer = result["answer"]
-        return answer
+        client = genai.Client()
+        result = client.models.embed_content(
+            model="text-embedding-004",
+            contents=[query],
+            config=types.EmbedContentConfig(output_dimensionality=768)
+        )
+        return result.embeddings[0].values
     except Exception as e:
-        return str(e)
+        return None
+
+def search_faiss_for_relevant_text(query, top_k=5):
+    query_embedding = generate_query_embedding(query)
+    
+    if query_embedding is None:
+        return "Error: Failed to generate query embedding."
+
+    try:
+        query_np = np.array([query_embedding], dtype=np.float32)
+
+        if index.ntotal == 0:
+            return "Error: FAISS index is empty. Please update the vector store."
+
+        if index.ntotal != len(markdown_chunks):
+            return "Error: FAISS index is mismatched with stored text."
+
+        distances, indices = index.search(query_np, top_k)
+
+        retrieved_chunks = []
+        for i in indices[0]:  
+            if 0 <= i < len(markdown_chunks):
+                retrieved_chunks.append(markdown_chunks[i])
+
+        if not retrieved_chunks:
+            return "No relevant documents found for this query."
+
+        return "\n\n".join(retrieved_chunks)
+
+    except Exception as e:
+        return "Error: Failed to retrieve relevant text."
+
+def query_google_gemini(user_query):
+    retrieved_text = search_faiss_for_relevant_text(user_query)
+
+    if "Error" in retrieved_text:
+        return retrieved_text
+
+    try:
+        client = genai.Client()
+        prompt = f"Context: {retrieved_text}\n\nUser Question: {user_query}\n\nAnswer:"
+        prompt += "Answer the question using the provided context only. Be accurate."
+
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[prompt]
+        )
+
+        return response.text
+    except Exception as e:
+        return "Error: Failed to generate response from Gemini."
+
+if __name__ == "__main__":
+    while True:
+        user_query = input("Ask a question (or type 'exit' to quit): ").strip()
+        if user_query.lower() == "exit":
+            break
+
+        response = query_google_gemini(user_query)
+        print("\nResponse:\n", response, "\n")
