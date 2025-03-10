@@ -1,0 +1,43 @@
+/* Basic container styling */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 800px; /* Adjusted from a fixed pixel width to a percentage */
+    margin: auto;
+    padding: 25px;
+    /* background: #f9f9f9; */ 
+    height: 500px;
+    overflow-y: scroll;
+    /* border: 1px solid #ccc; Optional: adds a border for better visibility */
+}
+
+/* Generic message styling */
+.message {
+    margin-bottom: 10px;
+    padding: 8px 15px;
+    border-radius: 10px;
+    max-width: 100%; /* Allow messages to take full width of the container */
+    word-wrap: break-word;
+}
+
+/* Bot message styling */
+.bot-message {
+    align-self: flex-start;
+    /* background-color: #e0e0e0; */
+    width: auto; /* Ensure messages can grow as needed */
+}
+
+.bot-text {
+    color: #333;
+}
+
+/* User message styling */
+.user-message {
+    align-self: flex-end;
+    background-color: #474a4d;
+    width: auto; /* Ensure messages can grow as needed */
+}
+
+.user-text {
+    color: white;
+}

@@ -1,0 +1,29 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "next/core-web-vitals"
+  ],
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "*.json",
+    "*.html",
+    "*.css",
+    "*.md"
+    // Add other file types you want to ignore
+  ],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "no-unused-vars": "warn",
+    "no-empty-pattern": "warn",
+    "@typescript-eslint/no-explicit-any": "warn"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}
