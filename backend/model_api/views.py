@@ -5,7 +5,7 @@ from model_api.model import query_google_gemini
 @csrf_exempt
 def ai_query(request):
     """Handles GET requests for AI queries."""
-    user_query = request.GET.get("query", "")
+    user_query = request.GET.get("query", "No query provided.")
     if not user_query:
         return JsonResponse({"error": "No query provided"}, status=400)
 
