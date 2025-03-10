@@ -7,7 +7,7 @@ from google.genai import types
 from pathlib import Path
 import json
 
-env_path = Path(__file__).resolve().parents[3] / '.env.local'
+env_path = Path(__file__).resolve().parents[2] / '.env.local'
 load_dotenv(dotenv_path=env_path)
 
 api_key = os.getenv("GOOGLE_API_KEY")
