@@ -51,7 +51,7 @@ def generate_query_embedding(query):
     except Exception as e:
         return None
 
-def search_faiss_for_relevant_text(query, top_k=5):
+def search_faiss_for_relevant_text(query, top_k=8):
     query_embedding = generate_query_embedding(query)
     
     if query_embedding is None:
