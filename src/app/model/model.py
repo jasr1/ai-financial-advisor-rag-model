@@ -5,8 +5,7 @@ import numpy as np
 from google import genai
 from google.genai import types
 from pathlib import Path
-import pymupdf4llm
-from langchain.text_splitter import MarkdownTextSplitter, MarkdownHeaderTextSplitter
+import json
 
 env_path = Path(__file__).resolve().parents[3] / '.env.local'
 load_dotenv(dotenv_path=env_path)
@@ -17,32 +16,21 @@ if api_key is None:
 os.environ["GOOGLE_API_KEY"] = api_key
 
 pdf_dir = "documents/"
+metadata_file_path = "vector_store/metadata.json"
 
-def combine_documents_to_markdown(pdf_dir):
-    pdf_paths = [os.path.join(pdf_dir, file) for file in os.listdir(pdf_dir) if file.endswith('.pdf')]
-    if not pdf_paths:
-        return []
+def get_chunks_from_metadata(metadata_file_path):
+    metadata_file = open(metadata_file_path, "r")
+    json_data = json.load(metadata_file)
 
-    documents = [pymupdf4llm.to_markdown(pdf) for pdf in pdf_paths]
-    return "\n\n".join(documents)
+    list_of_chunks = []
+    for chunk in json_data.values():
+        list_of_chunks.append(chunk)
 
-def split_markdown(markdown):
-    header_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=[
-        ("#", "H1"),  
-        ("##", "H2"),  
-        ("###", "H3"),  
-        ("####", "H4"),  
-        ("#####", "H5"),  
-        ("######", "H6")
-    ])
-    sections = header_splitter.split_text(markdown)
-    sections_text = [doc.page_content for doc in sections]
+    metadata_file.close()
 
-    text_splitter = MarkdownTextSplitter(chunk_size=1000, chunk_overlap=200)
-    return [chunk for section in sections_text for chunk in text_splitter.split_text(section)]
+    return list_of_chunks
 
-markdown_text = combine_documents_to_markdown(pdf_dir)
-markdown_chunks = split_markdown(markdown_text)
+markdown_chunks = get_chunks_from_metadata(metadata_file_path)
 
 try:
     vector_store_dir = Path(__file__).resolve().parent / "vector_store"
@@ -69,7 +57,7 @@ def generate_query_embedding(query):
     except Exception as e:
         return None
 
-def search_faiss_for_relevant_text(query, top_k=5):
+def search_faiss_for_relevant_text(query, top_k=10):
     query_embedding = generate_query_embedding(query)
     
     if query_embedding is None:

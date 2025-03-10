@@ -73,3 +73,4 @@ src/app/model/books/What Would the Rockefellers Do How the Wealthy Get and Stay 
 family_charter_responses.json
 src/app/model/documents/What Would the Rockefellers Do How the Wealthy Get and Stay That Way, And How You Can Too (Garrett B. Gunderson).pdf
 src/app/model/documents/tomorrow-and-tomorrow-and-tomorrow-by-gabrielle-zevin.pdf
+src/app/model/vector_store/metadata.json

@@ -9,6 +9,7 @@ from google.genai import types
 import numpy as np
 import time
 import math
+import json
 
 env_path = Path(__file__).resolve().parents[3] / '.env.local'
 load_dotenv(dotenv_path=env_path)
@@ -30,7 +31,7 @@ def combine_documents_to_markdown(pdf_dir):
     except Exception as e:
         print(f"An error occured when attempting to combine documents to markdown: {e}")
 
-def split_markdown(markdown):
+def split_markdown(markdown, vector_store_dir):
     try:
         header_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=[
             ("#", "H1"),  
@@ -46,7 +47,24 @@ def split_markdown(markdown):
         sections_text = [doc.page_content for doc in sections]
 
         text_splitter = MarkdownTextSplitter(chunk_size=1000, chunk_overlap=200)
-        return [chunk for section in sections_text for chunk in text_splitter.split_text(section)]
+        list_of_chunks = [chunk for section in sections_text for chunk in text_splitter.split_text(section)]
+        
+        chunk_metadata_dictionary = {}
+        for i, chunk in enumerate(list_of_chunks):
+            chunk_metadata_dictionary[i] = chunk
+        
+        os.makedirs(vector_store_dir, exist_ok=True)
+        chunk_metadata_file_path = os.path.join(vector_store_dir, "metadata.json")
+        
+        if os.path.exists(chunk_metadata_file_path):
+            overwrite = input(f"The file '{chunk_metadata_file_path}' already exists. Overwrite? (yes/no): ").strip().lower()
+            if overwrite != 'yes':
+                raise Exception("The process has been aborted by the user.")
+            
+        with open(chunk_metadata_file_path, "w") as outfile:
+            json.dump(chunk_metadata_dictionary, outfile, indent=4)
+
+        return list_of_chunks
         
     except Exception as e:
         print(f"An error occured when attempting to split the markdown text: {e}")
@@ -111,7 +129,7 @@ def store_embeddings_in_FAISS(embeddings, vector_store_dir):
 def update_vector_store(pdf_dir, vector_store_dir):
     try:
         markdown_text = combine_documents_to_markdown(pdf_dir)
-        splitted_markdown = split_markdown(markdown_text)
+        splitted_markdown = split_markdown(markdown_text, vector_store_dir)
         embeddings = generate_embeddings(splitted_markdown)
         if not embeddings:
             raise Exception("There are no embeddings")
