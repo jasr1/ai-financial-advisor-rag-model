@@ -19,16 +19,10 @@ pdf_dir = "documents/"
 metadata_file_path = "vector_store/metadata.json"
 
 def get_chunks_from_metadata(metadata_file_path):
-    metadata_file = open(metadata_file_path, "r")
-    json_data = json.load(metadata_file)
-
-    list_of_chunks = []
-    for chunk in json_data.values():
-        list_of_chunks.append(chunk)
-
-    metadata_file.close()
-
-    return list_of_chunks
+    with open(metadata_file_path, "r") as metadata_file:
+        json_data = json.load(metadata_file)
+    
+    return list(json_data.values())
 
 markdown_chunks = get_chunks_from_metadata(metadata_file_path)
 
