@@ -7,7 +7,7 @@ from google.genai import types
 from pathlib import Path
 import json
 
-env_path = Path(__file__).resolve().parents[2] / '.env.local'
+env_path = Path(__file__).resolve().parents[2] / ".env.local"
 load_dotenv(dotenv_path=env_path)
 
 api_key = os.getenv("GOOGLE_API_KEY")
@@ -15,14 +15,17 @@ if api_key is None:
     raise ValueError("GOOGLE_API_KEY not found in environment variables")
 os.environ["GOOGLE_API_KEY"] = api_key
 
+base_directory = os.path.dirname(os.path.abspath(__file__))
 pdf_dir = "documents/"
-metadata_file_path = "vector_store/metadata.json"
+metadata_file_path = os.path.join(base_directory, "vector_store", "metadata.json")
+
 
 def get_chunks_from_metadata(metadata_file_path):
     with open(metadata_file_path, "r") as metadata_file:
         json_data = json.load(metadata_file)
-    
+
     return list(json_data.values())
+
 
 markdown_chunks = get_chunks_from_metadata(metadata_file_path)
 
@@ -33,11 +36,14 @@ try:
     if faiss_index_file.is_file():
         index = faiss.read_index(str(faiss_index_file))
     else:
-        print("Vector store not found. Please run 'update_vector_store.py' to create it.")
+        print(
+            "Vector store not found. Please run 'update_vector_store.py' to create it."
+        )
         exit(1)
 except Exception as e:
     print(f"An error occurred while loading FAISS: {e}")
     exit(1)
+
 
 def generate_query_embedding(query):
     try:
@@ -45,15 +51,16 @@ def generate_query_embedding(query):
         result = client.models.embed_content(
             model="text-embedding-004",
             contents=[query],
-            config=types.EmbedContentConfig(output_dimensionality=768)
+            config=types.EmbedContentConfig(output_dimensionality=768),
         )
         return result.embeddings[0].values
     except Exception as e:
         return None
 
+
 def search_faiss_for_relevant_text(query, top_k=8):
     query_embedding = generate_query_embedding(query)
-    
+
     if query_embedding is None:
         return "Error: Failed to generate query embedding."
 
@@ -69,7 +76,7 @@ def search_faiss_for_relevant_text(query, top_k=8):
         distances, indices = index.search(query_np, top_k)
 
         retrieved_chunks = []
-        for i in indices[0]:  
+        for i in indices[0]:
             if 0 <= i < len(markdown_chunks):
                 retrieved_chunks.append(markdown_chunks[i])
 
@@ -80,6 +87,7 @@ def search_faiss_for_relevant_text(query, top_k=8):
 
     except Exception as e:
         return "Error: Failed to retrieve relevant text."
+
 
 def query_google_gemini(user_query):
     retrieved_text = search_faiss_for_relevant_text(user_query)
@@ -93,13 +101,13 @@ def query_google_gemini(user_query):
         prompt += "Answer the question using the provided context only. Be accurate."
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=[prompt]
+            model="gemini-2.0-flash", contents=[prompt]
         )
 
         return response.text
     except Exception as e:
         return "Error: Failed to generate response from Gemini."
+
 
 if __name__ == "__main__":
     while True:

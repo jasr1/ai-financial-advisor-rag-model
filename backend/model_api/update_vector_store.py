@@ -11,7 +11,7 @@ import time
 import math
 import json
 
-env_path = Path(__file__).resolve().parents[2] / '.env.local'
+env_path = Path(__file__).resolve().parents[2] / ".env.local"
 load_dotenv(dotenv_path=env_path)
 
 api_key = os.getenv("GOOGLE_API_KEY")
@@ -19,9 +19,14 @@ if api_key is None:
     raise ValueError("GOOGLE_API_KEY not found in environment variables")
 os.environ["GOOGLE_API_KEY"] = api_key
 
+
 def combine_documents_to_markdown(pdf_dir):
     try:
-        pdf_paths = [os.path.join(pdf_dir, file) for file in os.listdir(pdf_dir) if file.endswith('.pdf')]
+        pdf_paths = [
+            os.path.join(pdf_dir, file)
+            for file in os.listdir(pdf_dir)
+            if file.endswith(".pdf")
+        ]
         if not pdf_paths:
             raise FileNotFoundError("There are no pdf files in this directory.")
         if None in pdf_paths:
@@ -31,43 +36,57 @@ def combine_documents_to_markdown(pdf_dir):
     except Exception as e:
         print(f"An error occured when attempting to combine documents to markdown: {e}")
 
+
 def split_markdown(markdown, vector_store_dir):
     try:
-        header_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=[
-            ("#", "H1"),  
-            ("##", "H2"),  
-            ("###", "H3"),  
-            ("####", "H4"),  
-            ("#####", "H5"),  
-            ("######", "H6"),
-            ("#######", "H7"),
-            ("########", "H8")
-        ])
+        header_splitter = MarkdownHeaderTextSplitter(
+            headers_to_split_on=[
+                ("#", "H1"),
+                ("##", "H2"),
+                ("###", "H3"),
+                ("####", "H4"),
+                ("#####", "H5"),
+                ("######", "H6"),
+                ("#######", "H7"),
+                ("########", "H8"),
+            ]
+        )
         sections = header_splitter.split_text(markdown)
         sections_text = [doc.page_content for doc in sections]
 
         text_splitter = MarkdownTextSplitter(chunk_size=1000, chunk_overlap=200)
-        list_of_chunks = [chunk for section in sections_text for chunk in text_splitter.split_text(section)]
-        
+        list_of_chunks = [
+            chunk
+            for section in sections_text
+            for chunk in text_splitter.split_text(section)
+        ]
+
         chunk_metadata_dictionary = {}
         for i, chunk in enumerate(list_of_chunks):
             chunk_metadata_dictionary[i] = chunk
-        
+
         os.makedirs(vector_store_dir, exist_ok=True)
         chunk_metadata_file_path = os.path.join(vector_store_dir, "metadata.json")
-        
+
         if os.path.exists(chunk_metadata_file_path):
-            overwrite = input(f"The file '{chunk_metadata_file_path}' already exists. Overwrite? (yes/no): ").strip().lower()
-            if overwrite != 'yes':
+            overwrite = (
+                input(
+                    f"The file '{chunk_metadata_file_path}' already exists. Overwrite? (yes/no): "
+                )
+                .strip()
+                .lower()
+            )
+            if overwrite != "yes":
                 raise Exception("The process has been aborted by the user.")
-            
+
         with open(chunk_metadata_file_path, "w") as outfile:
             json.dump(chunk_metadata_dictionary, outfile, indent=4)
 
         return list_of_chunks
-        
+
     except Exception as e:
         print(f"An error occured when attempting to split the markdown text: {e}")
+
 
 def generate_embeddings(markdown_chunks, batch_size=100, wait_time=60):
     try:
@@ -75,23 +94,27 @@ def generate_embeddings(markdown_chunks, batch_size=100, wait_time=60):
         all_embeddings = []
 
         num_batches = math.ceil(len(markdown_chunks) / batch_size)
-        print(f"Number of batches: {num_batches}. Embedding will take approximately {num_batches} minutes due to rate limits imposed by the Google API.")
+        print(
+            f"Number of batches: {num_batches}. Embedding will take approximately {num_batches} minutes due to rate limits imposed by the Google API."
+        )
 
         currentBatch = 1
-        for batch_num, i in enumerate(range(0, len(markdown_chunks), batch_size), start=1):
+        for batch_num, i in enumerate(
+            range(0, len(markdown_chunks), batch_size), start=1
+        ):
             print(f"Now embedding Batch {currentBatch}.")
-            batch = markdown_chunks[i:i + batch_size]
+            batch = markdown_chunks[i : i + batch_size]
 
             result = client.models.embed_content(
                 model="text-embedding-004",
                 contents=batch,
-                config=types.EmbedContentConfig(output_dimensionality=768)
+                config=types.EmbedContentConfig(output_dimensionality=768),
             )
 
             batch_embeddings = [embedding.values for embedding in result.embeddings]
             all_embeddings.extend(batch_embeddings)
 
-            currentBatch+=1
+            currentBatch += 1
 
             if batch_num < num_batches:
                 print(f"Waiting {wait_time} seconds to embed next batch.")
@@ -101,6 +124,7 @@ def generate_embeddings(markdown_chunks, batch_size=100, wait_time=60):
     except Exception as e:
         print(f"An error occured when attempting to generate embeddings: {e}")
 
+
 def store_embeddings_in_FAISS(embeddings, vector_store_dir):
     try:
 
@@ -108,15 +132,21 @@ def store_embeddings_in_FAISS(embeddings, vector_store_dir):
         faiss_file_path = os.path.join(vector_store_dir, "faiss_index.bin")
 
         if os.path.exists(faiss_file_path):
-            overwrite = input(f"The file '{faiss_file_path}' already exists. Overwrite? (yes/no): ").strip().lower()
-            if overwrite != 'yes':
+            overwrite = (
+                input(
+                    f"The file '{faiss_file_path}' already exists. Overwrite? (yes/no): "
+                )
+                .strip()
+                .lower()
+            )
+            if overwrite != "yes":
                 raise Exception("The process has been aborted by the user.")
 
         embeddings_np = np.array(embeddings, dtype=np.float32)
 
         if len(embeddings_np) == 0:
             raise Exception("There are no embeddings.")
-        
+
         embedding_dim = embeddings_np.shape[1]
         index = faiss.IndexFlatL2(embedding_dim)
         index.add(embeddings_np)
@@ -125,6 +155,7 @@ def store_embeddings_in_FAISS(embeddings, vector_store_dir):
     except Exception as e:
         print(f"An error occured when attempting to store embeddings: {e}")
         raise
+
 
 def update_vector_store(pdf_dir, vector_store_dir):
     try:
@@ -136,6 +167,7 @@ def update_vector_store(pdf_dir, vector_store_dir):
         store_embeddings_in_FAISS(embeddings, vector_store_dir)
     except Exception as e:
         print(f"An error occured: {e}")
+
 
 if __name__ == "__main__":
     pdf_dir = "documents/"
