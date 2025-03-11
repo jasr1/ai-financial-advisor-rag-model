@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import ai_query, file_upload
+from .views import ai_query, file_upload, view_files
 
 urlpatterns = [
     path('query/', ai_query, name='ai_query'),
-    path('file-upload/', file_upload, name='file_upload')
+    path('file-upload/', file_upload, name='file_upload'),
+    path('file-list/', view_files, name='view_files'),
 ]

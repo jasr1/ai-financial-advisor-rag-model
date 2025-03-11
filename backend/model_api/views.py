@@ -29,3 +29,18 @@ def file_upload(request):
 
     return JsonResponse({"error": form.errors}, status=400)
 
+
+def view_files(request):
+    documents = Document.objects.all()
+    documents_dictionary = {'files':[]}
+    for doc in documents:
+        document_details = {
+            "file_name": doc.file_name,
+            "upload_time": doc.upload_time
+        }
+        documents_dictionary["files"].append(document_details)
+    documents_dictionary["total_files"] = len(documents_dictionary["files"])
+    return JsonResponse(documents_dictionary)
+
+
+
