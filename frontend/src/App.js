@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import FileUpload from "./components/FileUpload";
 
 function App() {
     const [query, setQuery] = useState("");
@@ -20,6 +21,7 @@ function App() {
     return (
         <div style={{ padding: "20px" }}>
             <h1>RAG Model Search</h1>
+            <FileUpload/>
             <input
                 type="text"
                 value={query}
