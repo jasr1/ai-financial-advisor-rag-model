@@ -42,5 +42,33 @@ def view_files(request):
     documents_dictionary["total_files"] = len(documents_dictionary["files"])
     return JsonResponse(documents_dictionary)
 
+from django.conf import settings
+import os
+
+@csrf_exempt
+@require_POST
+def delete_file(request):
+
+    deletion_request = request.POST.get("name", "No file name given.")
+    if not deletion_request:
+        return JsonResponse({"error": "No file name given."}, status=400)
+    
+    document = Document.objects.filter(file_name=deletion_request).first()
+    if not document:
+        return JsonResponse({"error": "File not found in database."}, status=404)
+
+    base_dir = settings.BASE_DIR
+    actual_filename = document.file_path.name
+    file_path = os.path.join(base_dir, 'model_api/documents', actual_filename)
+    does_file_exist = os.path.exists(file_path)
+    
+    if not does_file_exist:
+        return JsonResponse({"error": "File does not exist."}, status=404)
+    
+    os.remove(file_path)
+    document.delete()
+
+    return JsonResponse({"message": "File deleted successfully"}, status=200)
+
 
 
