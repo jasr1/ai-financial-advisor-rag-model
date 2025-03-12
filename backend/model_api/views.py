@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from model_api.model import query_google_gemini
+from model_api.model import query_google_gemini, load_faiss_and_metadata
 
 @csrf_exempt
 def ai_query(request):
@@ -71,4 +71,34 @@ def delete_file(request):
     return JsonResponse({"message": "File deleted successfully"}, status=200)
 
 
+from model_api.update_vector_store import update_vector_store
+import threading
 
+def run_model_update():
+    base_dir = settings.BASE_DIR
+    documents_path = os.path.join(base_dir, "model_api", "documents")
+    vector_store_path = os.path.join(base_dir, "model_api", "vector_store")
+
+    update_vector_store(documents_path, vector_store_path)
+    global index, markdown_chunks
+    index, markdown_chunks = load_faiss_and_metadata(vector_store_path)
+
+def generate_model(request):
+    thread = threading.Thread(target=run_model_update)
+    thread.name = 'model-generation-thread'
+    thread.start()
+
+    return JsonResponse({"message": "Model generation started. Check back later."}, status=202)
+
+
+MODEL_STATUS = "ready"
+
+def check_gen_status(request):
+    global MODEL_STATUS
+    MODEL_STATUS = 'ready'
+    for thread in threading.enumerate():
+        if thread.name == "model-generation-thread":
+            MODEL_STATUS = 'processing'
+            break
+
+    return JsonResponse({"message": MODEL_STATUS}, status=200)

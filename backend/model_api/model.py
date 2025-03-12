@@ -17,7 +17,9 @@ os.environ["GOOGLE_API_KEY"] = api_key
 
 base_directory = os.path.dirname(os.path.abspath(__file__))
 pdf_dir = "documents/"
-metadata_file_path = os.path.join(base_directory, "vector_store", "metadata.json")
+vector_store_path = os.path.join(base_directory, "vector_store")
+metadata_file_path = os.path.join(vector_store_path, "metadata.json")
+
 
 
 def get_chunks_from_metadata(metadata_file_path):
@@ -26,24 +28,31 @@ def get_chunks_from_metadata(metadata_file_path):
 
     return list(json_data.values())
 
+def load_faiss_and_metadata(vector_store_path):
+    try:
+        faiss_index_file = os.path.join(vector_store_path, "faiss_index.bin")
+        metadata_file_path = os.path.join(vector_store_path, "metadata.json")
 
-markdown_chunks = get_chunks_from_metadata(metadata_file_path)
+        if os.path.exists(faiss_index_file):
+            new_index = faiss.read_index(faiss_index_file)
+        else:
+            raise FileNotFoundError("FAISS index file not found. Please generate the model first.")
+        
+        with open(metadata_file_path, "r") as metadata_file:
+            json_data = json.load(metadata_file)
+            new_markdown_chunks = list(json_data.values())
+
+        return new_index, new_markdown_chunks
+    
+    except Exception as e:
+        raise RuntimeError(f"Failed to load FAISS and metadata: {e}")
 
 try:
-    vector_store_dir = Path(__file__).resolve().parent / "vector_store"
-    faiss_index_file = vector_store_dir / "faiss_index.bin"
-
-    if faiss_index_file.is_file():
-        index = faiss.read_index(str(faiss_index_file))
-    else:
-        print(
-            "Vector store not found. Please run 'update_vector_store.py' to create it."
-        )
-        exit(1)
+    index, markdown_chunks = load_faiss_and_metadata(vector_store_path)
 except Exception as e:
-    print(f"An error occurred while loading FAISS: {e}")
-    exit(1)
-
+    print(f"Warning: {e}")
+    index = None
+    markdown_chunks = []
 
 def generate_query_embedding(query):
     try:
@@ -59,6 +68,14 @@ def generate_query_embedding(query):
 
 
 def search_faiss_for_relevant_text(query, top_k=8):
+    global index, markdown_chunks
+
+    try:
+        index, markdown_chunks = load_faiss_and_metadata(vector_store_path)
+
+    except Exception as e:
+        return f"Error: Could not reload FAISS - {e}"
+    
     query_embedding = generate_query_embedding(query)
 
     if query_embedding is None:

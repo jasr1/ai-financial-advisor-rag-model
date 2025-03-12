@@ -68,16 +68,16 @@ def split_markdown(markdown, vector_store_dir):
         os.makedirs(vector_store_dir, exist_ok=True)
         chunk_metadata_file_path = os.path.join(vector_store_dir, "metadata.json")
 
-        if os.path.exists(chunk_metadata_file_path):
-            overwrite = (
-                input(
-                    f"The file '{chunk_metadata_file_path}' already exists. Overwrite? (yes/no): "
-                )
-                .strip()
-                .lower()
-            )
-            if overwrite != "yes":
-                raise Exception("The process has been aborted by the user.")
+        # if os.path.exists(chunk_metadata_file_path):
+        #     overwrite = (
+        #         input(
+        #             f"The file '{chunk_metadata_file_path}' already exists. Overwrite? (yes/no): "
+        #         )
+        #         .strip()
+        #         .lower()
+        #     )
+        #     if overwrite != "yes":
+        #         raise Exception("The process has been aborted by the user.")
 
         with open(chunk_metadata_file_path, "w") as outfile:
             json.dump(chunk_metadata_dictionary, outfile, indent=4)
@@ -119,7 +119,7 @@ def generate_embeddings(markdown_chunks, batch_size=100, wait_time=60):
             if batch_num < num_batches:
                 print(f"Waiting {wait_time} seconds to embed next batch.")
                 time.sleep(wait_time)
-
+        print("Embeddings generated.")
         return all_embeddings
     except Exception as e:
         print(f"An error occured when attempting to generate embeddings: {e}")
@@ -131,16 +131,16 @@ def store_embeddings_in_FAISS(embeddings, vector_store_dir):
         os.makedirs(vector_store_dir, exist_ok=True)
         faiss_file_path = os.path.join(vector_store_dir, "faiss_index.bin")
 
-        if os.path.exists(faiss_file_path):
-            overwrite = (
-                input(
-                    f"The file '{faiss_file_path}' already exists. Overwrite? (yes/no): "
-                )
-                .strip()
-                .lower()
-            )
-            if overwrite != "yes":
-                raise Exception("The process has been aborted by the user.")
+        # if os.path.exists(faiss_file_path):
+        #     overwrite = (
+        #         input(
+        #             f"The file '{faiss_file_path}' already exists. Overwrite? (yes/no): "
+        #         )
+        #         .strip()
+        #         .lower()
+        #     )
+        #     if overwrite != "yes":
+        #         raise Exception("The process has been aborted by the user.")
 
         embeddings_np = np.array(embeddings, dtype=np.float32)
 
@@ -152,6 +152,7 @@ def store_embeddings_in_FAISS(embeddings, vector_store_dir):
         index.add(embeddings_np)
 
         faiss.write_index(index, faiss_file_path)
+        print("Embeddings stored in FAISS.")
     except Exception as e:
         print(f"An error occured when attempting to store embeddings: {e}")
         raise
