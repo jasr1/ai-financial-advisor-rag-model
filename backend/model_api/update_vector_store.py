@@ -160,6 +160,7 @@ def store_embeddings_in_FAISS(embeddings, vector_store_dir):
         
         model_status = ModelStatus.get_instance()
         model_status.set_time_estimate(0)
+        model_status.set_model_status('ready')
 
         print("Embeddings stored in FAISS.")
     except Exception as e:

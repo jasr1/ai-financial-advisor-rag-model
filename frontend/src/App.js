@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import FileUpload from "./components/FileUpload";
 import GenerateModelButton from "./components/GenerateModelButton";
+import ModelStatus from "./components/ModelStatus";
 
 function App() {
     const [query, setQuery] = useState("");
@@ -10,6 +11,8 @@ function App() {
     const [uploadedFiles, setUploadedFiles] = useState([])
 
     const hasUploadedFiles = uploadedFiles.length > 0;
+
+    const [generateButtonClicked, setGenerateButtonClicked] = useState(false)
 
     const handleQuery = async () => {
         try {
@@ -27,7 +30,8 @@ function App() {
         <div style={{ padding: "20px" }}>
             <h1>RAG Model Search</h1>
             <FileUpload uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}/>
-            <GenerateModelButton hasUploadedFiles={hasUploadedFiles}/>
+            <GenerateModelButton hasUploadedFiles={hasUploadedFiles} setGenerateButtonClicked={setGenerateButtonClicked}/>
+            <ModelStatus generateButtonClicked={generateButtonClicked} setGenerateButtonClicked={setGenerateButtonClicked}/>
             <input
                 type="text"
                 value={query}
