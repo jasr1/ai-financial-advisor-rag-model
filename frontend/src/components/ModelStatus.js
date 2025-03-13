@@ -1,40 +1,62 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 
-export default function ModelStatus({generateButtonClicked, setGenerateButtonClicked}) {
-
+export default function ModelStatus({ generateButtonClicked, setGenerateButtonClicked }) {
     const [response, setResponse] = useState("");
     const [timeEstimate, setTimeEstimate] = useState(null);
 
-    const checkModelStatus = async () => {
+    const intervalRef = useRef(null);
+    const timeoutRef = useRef(null);
+
+    const checkModelStatus = useCallback(async () => {
         try {
             const res = await axios.get(`https://musical-guacamole-xpq4q95pw4526w4g-8000.app.github.dev/api/check-gen-status/`);
             setResponse(res.data.message);
             setTimeEstimate(res.data.time_estimate);
-
+    
             if (res.data.message === 'ready' || res.data.message === 'error') {
-                setGenerateButtonClicked(false)
+                setGenerateButtonClicked(false);
+                clearInterval(intervalRef.current);
             }
+    
+            return res.data;
         } catch (error) {
             console.error("Error fetching data:", error);
-            setGenerateButtonClicked(false)
+            setGenerateButtonClicked(false);
+            clearInterval(intervalRef.current);
+            return { message: "error" };
         }
-    };
+    }, [setGenerateButtonClicked]);
+    
 
     useEffect(() => {
-        let interval = null;
-
+        const initiatePolling = () => {
+            intervalRef.current = setInterval(async () => {
+                const data = await checkModelStatus();
+    
+                if (data.message === 'processing' && data.time_estimate > 0) {
+                    clearInterval(intervalRef.current);
+                    setResponse(data.message);
+                    setTimeEstimate(data.time_estimate);
+    
+                    timeoutRef.current = setTimeout(() => {
+                        initiatePolling();
+                    }, data.time_estimate * 60 * 1000);
+                }
+            }, 5000);
+        };
+    
         if (generateButtonClicked) {
             checkModelStatus();
-            interval = setInterval(checkModelStatus, 5000)
+            initiatePolling();
         }
-
+    
         return () => {
-            if (interval) clearInterval(interval);
+            clearInterval(intervalRef.current);
+            clearTimeout(timeoutRef.current);
         };
-
-
-        }, [generateButtonClicked, response, setGenerateButtonClicked])
+    }, [generateButtonClicked, setGenerateButtonClicked, checkModelStatus]);
+    
 
     return (
         <div className="model-status">
