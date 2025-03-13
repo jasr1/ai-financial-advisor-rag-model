@@ -1,10 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
 
-export default function FileUpload() {
+export default function FileUpload({uploadedFiles, setUploadedFiles}) {
     const [file, setFile] = useState(null);
     const [response, setResponse] = useState("");
-    const [uploadedfiles, setUploadedfiles] = useState([])
     const [deletedfileresponse, setDeletedfileresponse] = useState("")
 
     //technically I could use a dom selector method and directly target the input and make its value ""
@@ -46,19 +45,19 @@ export default function FileUpload() {
         }
     };
 
-    const fetchFiles = async () => {
+    const fetchFiles = useCallback(async () => {
         try {
             const res = await axios.get(`https://musical-guacamole-xpq4q95pw4526w4g-8000.app.github.dev/api/file-list/`);
-            setUploadedfiles(res.data.files);
+            setUploadedFiles(res.data.files);
         } catch (error) {
             console.error("Error fetching data:", error);
-            setUploadedfiles([])
+            setUploadedFiles([])
         }
-    };
+    }, [setUploadedFiles]);
 
     useEffect(() => {
         fetchFiles();
-    }, [])
+    }, [fetchFiles])
 
     const deleteFile = async (name) => {
 
@@ -114,7 +113,7 @@ export default function FileUpload() {
             <div className="uploaded-files">
                 <h3>Uploaded Files</h3>
                 <ul>
-                    {uploadedfiles.map((file) => (
+                    {uploadedFiles.map((file) => (
                         <li key={file.file_name}>
                             {file.file_name} (Uploaded: {file.upload_time})
                             <button onClick={()=>deleteFile(file.file_name)}>X</button>
