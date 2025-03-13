@@ -90,15 +90,13 @@ def generate_model(request):
 
     return JsonResponse({"message": "Model generation started. Check back later."}, status=202)
 
-
-MODEL_STATUS = "ready"
+from model_api.model_status import ModelStatus
 
 def check_gen_status(request):
-    global MODEL_STATUS
-    MODEL_STATUS = 'ready'
+    model_status = ModelStatus.get_instance()
     for thread in threading.enumerate():
         if thread.name == "model-generation-thread":
-            MODEL_STATUS = 'processing'
+            model_status.set_model_status("processing")
             break
 
-    return JsonResponse({"message": MODEL_STATUS}, status=200)
+    return JsonResponse({"message": model_status.get_model_status(), "time_estimate": model_status.get_time_estimate()}, status=200)

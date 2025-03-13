@@ -10,6 +10,7 @@ import numpy as np
 import time
 import math
 import json
+from model_api.model_status import ModelStatus
 
 env_path = Path(__file__).resolve().parents[2] / ".env.local"
 load_dotenv(dotenv_path=env_path)
@@ -98,7 +99,11 @@ def generate_embeddings(markdown_chunks, batch_size=100, wait_time=60):
             f"Number of batches: {num_batches}. Embedding will take approximately {num_batches} minutes due to rate limits imposed by the Google API."
         )
 
+        model_status = ModelStatus.get_instance()
+        model_status.set_time_estimate(num_batches)
+
         currentBatch = 1
+
         for batch_num, i in enumerate(
             range(0, len(markdown_chunks), batch_size), start=1
         ):
@@ -152,6 +157,10 @@ def store_embeddings_in_FAISS(embeddings, vector_store_dir):
         index.add(embeddings_np)
 
         faiss.write_index(index, faiss_file_path)
+        
+        model_status = ModelStatus.get_instance()
+        model_status.set_time_estimate(0)
+
         print("Embeddings stored in FAISS.")
     except Exception as e:
         print(f"An error occured when attempting to store embeddings: {e}")
