@@ -2,7 +2,7 @@ from django import forms
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 
-MAX_FILE_SIZE = 10 * 1024 * 1024
+MAX_FILE_SIZE = 20 * 1024 * 1024
 
 class UploadedFilesForm(forms.Form):
     file = forms.FileField(validators=[FileExtensionValidator(['pdf'])])
