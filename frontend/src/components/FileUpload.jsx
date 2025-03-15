@@ -96,34 +96,86 @@ export default function FileUpload({uploadedFiles, setUploadedFiles}) {
         }
     }, [deletedfileresponse, response])
 
+
     return (
-        <div className="upload-box">
-            <h2>Upload File</h2>
-            <div className="upload-buttons">
-                <input 
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={(e) => setFile(e.target.files[0])}
-                />
-                <button onClick={handleSubmit}>Upload</button>
+        <div className="bg-white rounded-2xl p-6 shadow-lg w-full max-w-lg mx-auto mt-6">
+
+            <div className="space-y-2">
+                <p className="text-[#1C1C1E] font-medium text-lg">
+                    Start by clicking on <span className="font-semibold">"Choose File"</span> and selecting a PDF document.
+                </p>
+                <p className="text-[#6B7280] text-sm">
+                    Then click <span className="font-semibold">"Upload"</span> to add it to the list of uploaded files.
+                </p>
+                <p className="text-[#6B7280] text-sm">
+                    You can add as many PDFs as you'd like, but individual sizes should be below <span className="font-semibold">20MB</span>.
+                </p>
             </div>
-            <div className="upload-messages">
-                <p>{response}</p>
+    
+            <div className="flex flex-col gap-4 mt-6">
+                <div className="flex items-center space-x-4">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={(e) => setFile(e.target.files[0])}
+                        className="hidden"
+                    />
+                    <label 
+                        className="cursor-pointer bg-[#007AFF] text-white px-6 py-2 rounded-lg font-medium shadow-md hover:bg-[#005FC5] transition"
+                        onClick={() => fileInputRef.current.click()}
+                    >
+                        Choose File
+                    </label>
+    
+                    {file && (
+                        <span className="text-[#1C1C1E] text-sm font-medium truncate max-w-[200px]">
+                            {file.name}
+                        </span>
+                    )}
+                </div>
+    
+                <button 
+                    className="cursor-pointer bg-[#34C759] hover:bg-[#28A745] text-white px-6 py-2 rounded-lg font-medium shadow-md transition"
+                    onClick={handleSubmit}
+                >
+                    Upload
+                </button>
             </div>
-            <div className="uploaded-files">
-                <h3>Uploaded Files</h3>
-                <ul>
+    
+            {response && (
+                <div className="mt-4 text-[#1C1C1E] bg-[#E5E7EB] rounded-md px-4 py-2 text-sm">
+                    {response}
+                </div>
+            )}
+    
+            <div className="mt-6">
+                <h3 className="text-lg font-semibold text-[#1C1C1E]">Uploaded Files</h3>
+                <ul className="mt-2 space-y-2">
                     {uploadedFiles.map((file) => (
-                        <li key={file.file_name}>
-                            {file.file_name} (Uploaded: {file.upload_time})
-                            <button onClick={()=>deleteFile(file.file_name)}>X</button>
+                        <li 
+                            key={file.file_name} 
+                            className="flex justify-between items-center bg-[#F8FAFC] px-4 py-2 rounded-lg shadow-sm border border-[#D1D5DB]"
+                        >
+                            <span className="text-[#1C1C1E] text-sm font-medium truncate max-w-[400px]">
+                                {file.file_name}
+                            </span>
+                            <button 
+                                onClick={() => deleteFile(file.file_name)} 
+                                className="cursor-pointer text-[#FF3B30] hover:text-[#D11A2A] transition"
+                            >
+                                ✕
+                            </button>
                         </li>
                     ))}
                 </ul>
             </div>
-            <div className="deleted-messages">
-                <p>{deletedfileresponse}</p>
-            </div>
+    
+            {deletedfileresponse && (
+                <div className="mt-4 text-[#1C1C1E] bg-[#E5E7EB] rounded-md px-4 py-2 text-sm">
+                    {deletedfileresponse}
+                </div>
+            )}
         </div>
     );
+    
 }

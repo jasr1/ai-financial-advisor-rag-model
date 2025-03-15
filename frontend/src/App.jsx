@@ -27,21 +27,43 @@ function App() {
     };
 
     return (
-        <div style={{ padding: "20px" }}>
-            <h1>RAG Model Search</h1>
-            <FileUpload uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}/>
-            <GenerateModelButton hasUploadedFiles={hasUploadedFiles} setGenerateButtonClicked={setGenerateButtonClicked}/>
-            <ModelStatus generateButtonClicked={generateButtonClicked} setGenerateButtonClicked={setGenerateButtonClicked}/>
-            <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ask a question..."
-            />
-            <button onClick={handleQuery}>Search</button>
+        <div>
+            <div className="flex flex-col items-center">
+                <h1 className="font-bold p-8 bg-gradient-to-r from-cyan-500 to-blue-500 inline-block text-transparent bg-clip-text">RAG Model Search</h1>
+            </div>
 
-            <h3>Response</h3>
-            <p>{response}</p>
+
+            <div className="flex flex-col items-start m-8">
+
+                <div className="title flex items-center gap-3">
+                    <div className="flex items-center justify-center rounded-full h-10 w-10 bg-green-600 text-neutral-50">1</div>
+                    <h2 className="font-bold bg-gradient-to-r from-[#0099FF] to-[#0066FF] inline-block text-transparent bg-clip-text">Upload File</h2>
+                </div>
+                <FileUpload uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}/>
+
+                <div className="title flex items-center gap-3 mt-6">
+                    <div className="flex items-center justify-center rounded-full h-10 w-10 bg-green-600 text-neutral-50">2</div>
+                    <h2 className="font-bold text-sky-500">Generate Model</h2>
+                </div>
+                <GenerateModelButton hasUploadedFiles={hasUploadedFiles} setGenerateButtonClicked={setGenerateButtonClicked}/>
+                <ModelStatus generateButtonClicked={generateButtonClicked} setGenerateButtonClicked={setGenerateButtonClicked}/>
+                
+                <div className="title flex items-center gap-3 mt-6">
+                    <div className="flex items-center justify-center rounded-full h-10 w-10 bg-green-600 text-neutral-50">3</div>
+                    <h2 className="font-bold bg-gradient-to-r from-[#0099FF] to-[#0066FF] inline-block text-transparent bg-clip-text">Conversate</h2>
+                </div>
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Ask a question..."
+                />
+                <button onClick={handleQuery}>Search</button>
+
+                <h3>Response</h3>
+                <p>{response}</p>
+            </div>
+            
         </div>
     );
 }

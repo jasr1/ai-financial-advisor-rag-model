@@ -12,9 +12,19 @@ export default function GenerateModelButton({hasUploadedFiles, setGenerateButton
             setGenerateButtonClicked(false);
         }
     };
-    return(
-        <div className="generate-model-btn">
-            <button onClick={generatemodel} disabled={!hasUploadedFiles}>Generate Model</button>
+    return (
+        <div className="bg-white rounded-2xl p-6 shadow-lg w-full max-w-lg mx-auto">
+            <button 
+                onClick={generatemodel} 
+                disabled={!hasUploadedFiles}
+                className={`px-6 py-2 rounded-lg font-medium shadow-md transition ${
+                    hasUploadedFiles 
+                        ? "bg-[#007AFF] hover:bg-[#005FC5] text-white cursor-pointer" 
+                        : "bg-[#D1D5DB] text-[#9CA3AF] cursor-not-allowed"
+                }`}
+            >
+                Generate Model
+            </button>
         </div>
     );
 }
