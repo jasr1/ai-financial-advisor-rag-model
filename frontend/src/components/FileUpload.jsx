@@ -98,7 +98,7 @@ export default function FileUpload({uploadedFiles, setUploadedFiles}) {
 
 
     return (
-        <div className="bg-white rounded-2xl p-6 shadow-lg w-full max-w-lg mx-auto mt-6">
+        <div className="bg-white rounded-2xl p-6 shadow-lg w-full max-w-2xl mx-auto mt-6">
 
             <div className="space-y-2">
                 <p className="text-[#1C1C1E] font-medium text-lg">
@@ -134,12 +134,15 @@ export default function FileUpload({uploadedFiles, setUploadedFiles}) {
                     )}
                 </div>
     
-                <button 
-                    className="cursor-pointer bg-[#34C759] hover:bg-[#28A745] text-white px-6 py-2 rounded-lg font-medium shadow-md transition"
-                    onClick={handleSubmit}
-                >
-                    Upload
-                </button>
+                <div className="flex items-center gap-4">
+                    <button 
+                        className="cursor-pointer bg-[#34C759] hover:bg-[#28A745] text-white px-6 py-2 rounded-lg font-medium shadow-md transition w-auto min-w-[180px] text-center"
+                        onClick={handleSubmit}
+                    >
+                        Upload
+                    </button>
+                </div>
+
             </div>
     
             {response && (
@@ -156,7 +159,7 @@ export default function FileUpload({uploadedFiles, setUploadedFiles}) {
                             key={file.file_name} 
                             className="flex justify-between items-center bg-[#F8FAFC] px-4 py-2 rounded-lg shadow-sm border border-[#D1D5DB]"
                         >
-                            <span className="text-[#1C1C1E] text-sm font-medium truncate max-w-[400px]">
+                            <span className="text-[#1C1C1E] text-sm font-medium truncate max-w-[480px]">
                                 {file.file_name}
                             </span>
                             <button 

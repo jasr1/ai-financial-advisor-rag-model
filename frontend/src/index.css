@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-@theme {
-  --font-display: "Satoshi", "sans-serif";
-}
-
 body {
   @apply bg-[#F5F5F7] text-[#1C1C1E] font-sans;
 }
