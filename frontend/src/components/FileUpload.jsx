@@ -128,7 +128,7 @@ export default function FileUpload({uploadedFiles, setUploadedFiles}) {
                     </label>
     
                     {file && (
-                        <span className="text-[#1C1C1E] text-sm font-medium truncate max-w-[200px]">
+                        <span className="text-[#1C1C1E] text-sm font-medium truncate max-w-[400px]">
                             {file.name}
                         </span>
                     )}

@@ -87,7 +87,7 @@ export default function GenerateModel({ hasUploadedFiles }) {
 
             <div className="mt-6">
                 <p className="text-[#1C1C1E] font-medium text-lg">Model Status: {response || "Waiting..."}</p>
-                <p className="text-[#6B7280] text-sm">Time Estimate: {timeEstimate || "0 minutes."}</p>
+                <p className="text-[#6B7280] text-sm">Time Estimate: {timeEstimate + " minutes."|| "0 minutes."}</p>
             </div>
         </div>
     );
