@@ -1,4 +1,5 @@
-# Videre Financiers AI-Powered Financial Query System
+# LLM-Powered Document Query System
+![RAG Model Search](images/llm-1.png)
 
 ## Overview
 This project is a Retrieval-Augmented Generation (RAG) model designed to assist users with financial queries using company-provided documents as the source of truth. Initially developed for Videre Financiers, this refactored version includes a **React (Vite) front end** and a **Django backend** with **Google Gemini API** replacing OpenAI's ChatGPT API. The original project files, including my contributions, are included in the folder titled `original-project-files`.
@@ -82,15 +83,24 @@ npx vite
 ### 1. **Uploading a File**
 - Navigate to the application in the browser.
 - Click **Choose File**, select a PDF, and upload.
+![File Upload](images/llm-2.png)
 
 ### 2. **Generating the Model**
 - Click **Generate Model** after uploading PDFs.
 - Wait for model processing to complete.
+- **Processing State:**  
+![Processing Model](images/llm-3.png)  
+- **Ready State:**  
+![Model Ready](images/llm-4.png)
 
 ### 3. **Asking Questions**
 - Enter a question in the input box.
+- **Before Input:**  
+![Empty Input](images/llm-5.png)
 - The system retrieves the most relevant document chunks.
 - AI generates a response using the extracted context.
+- **After Querying:**  
+![Query Response](images/llm-6.png)
 
 ## API Endpoints
 | Endpoint | Method | Description |

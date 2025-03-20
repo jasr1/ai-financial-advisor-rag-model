@@ -11,7 +11,7 @@ export default function GenerateModel({ hasUploadedFiles }) {
 
     const generatemodel = async () => {
         try {
-            await axios.get(`https://musical-guacamole-xpq4q95pw4526w4g-8000.app.github.dev/api/generate-model/`);
+            await axios.get(`https://opulent-tribble-grwpw54rx7pc9vgw-8000.app.github.dev/api/generate-model/`);
             setGenerateButtonClicked(true);
         } catch (error) {
             console.error("Error generating model:", error);
@@ -21,7 +21,7 @@ export default function GenerateModel({ hasUploadedFiles }) {
 
     const checkModelStatus = useCallback(async () => {
         try {
-            const res = await axios.get(`https://musical-guacamole-xpq4q95pw4526w4g-8000.app.github.dev/api/check-gen-status/`);
+            const res = await axios.get(`https://opulent-tribble-grwpw54rx7pc9vgw-8000.app.github.dev/api/check-gen-status/`);
             setResponse(res.data.message);
             setTimeEstimate(res.data.time_estimate);
 

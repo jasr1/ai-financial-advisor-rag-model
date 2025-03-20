@@ -9,10 +9,9 @@ def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rag_model.settings")
 
     if "CODESPACE_NAME" in os.environ and "GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN" in os.environ:
-        codespace_url = f"https://{os.environ['CODESPACE_NAME']}-8000.{os.environ['GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN']}/api/query/?query=Your-Query-Here"
+        codespace_url = f"https://{os.environ['CODESPACE_NAME']}-8000.{os.environ['GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN']}"
         print("\nSince this is GitHub Codespaces, change the visibility of the port to public and use the URL below to query.")
         print(f"Django is running at: {codespace_url}")
-        print("Be sure to replace 'Your-Query-Here' with the appropriate query.\n")
 
     
     try:

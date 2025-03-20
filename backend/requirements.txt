@@ -1,9 +1,10 @@
 django
 djangorestframework
+django-cors-headers
 python-dotenv
 faiss-cpu
 numpy
-google-generativeai
+google-genai
 pymupdf4llm
 langchain
 pymupdf

@@ -13,7 +13,7 @@ function App() {
     const handleQuery = async () => {
         try {
             const res = await axios.get(
-                `https://musical-guacamole-xpq4q95pw4526w4g-8000.app.github.dev/api/query/`,
+                `https://opulent-tribble-grwpw54rx7pc9vgw-8000.app.github.dev/api/query/`,
                 { params: { query } }
             );
             setResponse(res.data.response);

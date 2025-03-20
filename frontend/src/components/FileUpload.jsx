@@ -22,7 +22,7 @@ export default function FileUpload({uploadedFiles, setUploadedFiles}) {
 
         try {
             const res = await axios.post(
-                `https://musical-guacamole-xpq4q95pw4526w4g-8000.app.github.dev/api/file-upload/`, 
+                `https://opulent-tribble-grwpw54rx7pc9vgw-8000.app.github.dev/api/file-upload/`, 
                 formData,
                 {
                     headers: {
@@ -47,7 +47,7 @@ export default function FileUpload({uploadedFiles, setUploadedFiles}) {
 
     const fetchFiles = useCallback(async () => {
         try {
-            const res = await axios.get(`https://musical-guacamole-xpq4q95pw4526w4g-8000.app.github.dev/api/file-list/`);
+            const res = await axios.get(`https://opulent-tribble-grwpw54rx7pc9vgw-8000.app.github.dev/api/file-list/`);
             setUploadedFiles(res.data.files);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -66,7 +66,7 @@ export default function FileUpload({uploadedFiles, setUploadedFiles}) {
 
         try {
             const res = await axios.post(
-                `https://musical-guacamole-xpq4q95pw4526w4g-8000.app.github.dev/api/delete-file/`, 
+                `https://opulent-tribble-grwpw54rx7pc9vgw-8000.app.github.dev/api/delete-file/`, 
                 formData,
                 {
                     headers: {
