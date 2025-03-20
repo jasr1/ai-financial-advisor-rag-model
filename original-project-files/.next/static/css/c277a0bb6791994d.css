@@ -1,0 +1,1 @@
+.chat-container{display:flex;flex-direction:column;max-width:800px;margin:auto;padding:25px;height:500px;overflow-y:scroll}.message{margin-bottom:10px;padding:8px 15px;border-radius:10px;max-width:100%;word-wrap:break-word}.bot-message{align-self:flex-start;width:auto}.bot-text{color:#333}.user-message{align-self:flex-end;background-color:#474a4d;width:auto}.user-text{color:#fff}

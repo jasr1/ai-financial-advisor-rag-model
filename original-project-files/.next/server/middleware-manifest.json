@@ -1,0 +1,58 @@
+{
+  "version": 3,
+  "middleware": {
+    "/": {
+      "files": [
+        "prerender-manifest.js",
+        "server/edge-runtime-webpack.js",
+        "server/src/middleware.js"
+      ],
+      "name": "src/middleware",
+      "page": "/",
+      "matchers": [
+        {
+          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:\\/((?!_next\\/static|_next\\/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*))(.json)?[\\/#\\?]?$",
+          "originalSource": "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "environments": {
+        "previewModeId": "5737b4353620e64d1d733336fb8c4164",
+        "previewModeSigningKey": "4fc481b41221377c11d242c2d1902fda98d04e83434fa838e79d0998987a4ab1",
+        "previewModeEncryptionKey": "1f78abfa4455135e8425f82f3d1c2f2c22f4791836c2c8d84180ea9f06559b00"
+      }
+    }
+  },
+  "functions": {
+    "/api/generate-family-crest/route": {
+      "files": [
+        "server/middleware-build-manifest.js",
+        "server/middleware-react-loadable-manifest.js",
+        "server/next-font-manifest.js",
+        "server/interception-route-rewrite-manifest.js",
+        "prerender-manifest.js",
+        "server/edge-runtime-webpack.js",
+        "server/app/api/generate-family-crest/route.js"
+      ],
+      "name": "app/api/generate-family-crest/route",
+      "page": "/api/generate-family-crest/route",
+      "matchers": [
+        {
+          "regexp": "^/api/generate\\-family\\-crest$",
+          "originalSource": "/api/generate-family-crest"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "environments": {
+        "previewModeId": "5737b4353620e64d1d733336fb8c4164",
+        "previewModeSigningKey": "4fc481b41221377c11d242c2d1902fda98d04e83434fa838e79d0998987a4ab1",
+        "previewModeEncryptionKey": "1f78abfa4455135e8425f82f3d1c2f2c22f4791836c2c8d84180ea9f06559b00"
+      }
+    }
+  },
+  "sortedMiddleware": [
+    "/"
+  ]
+}
