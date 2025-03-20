@@ -1,0 +1,9 @@
+django
+djangorestframework
+python-dotenv
+faiss-cpu
+numpy
+google-generativeai
+pymupdf4llm
+langchain
+pymupdf
