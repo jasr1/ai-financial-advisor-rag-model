@@ -49,8 +49,8 @@ The system allows users to upload PDFs, process them into a **FAISS vector store
 ## Setup & Installation
 ### 1. Clone the Repository
 ```sh
-git clone https://github.com/YOUR_USERNAME/Videre-Financiers-RAG.git
-cd Videre-Financiers-RAG
+https://github.com/jasr1/ai-financial-advisor-rag-model.git
+cd ai-financial-advisor-rag-model
 ```
 
 ### 2. Backend Setup (Django)
